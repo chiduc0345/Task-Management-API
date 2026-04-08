@@ -1,37 +1,37 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// JWT
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
     {
-        var jwt = builder.Configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwt["Key"]);
+        var jwtSettings = builder.Configuration.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = jwt["Issuer"],
+            ValidIssuer = jwtSettings["Issuer"],
 
             ValidateAudience = true,
-            ValidAudience = jwt["Issuer"],
+            ValidAudience = jwtSettings["Issuer"],
 
             ValidateLifetime = true,
+
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
 
-builder.Services.AddAuthorization();
-
 var app = builder.Build();
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -41,7 +41,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();

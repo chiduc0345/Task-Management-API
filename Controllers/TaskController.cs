@@ -1,65 +1,82 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TaskManager.DAO;
-using TaskManager.DTO;
+using TaskManager.Model;
 
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+namespace TaskManager.Controllers
 {
-    private readonly IConfiguration _configuration;
-    private readonly userDAO _dao;
 
-    public AuthController(IConfiguration configuration)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TaskController:ControllerBase
     {
-        _configuration = configuration;
-        _dao = new userDAO();
-    }
-
-    private string GenerateToken(string username, string role)
-    {
-        var claims = new[]
+        taskDAO taskDao = new taskDAO();
+        TaskIterm taskIterms = new TaskIterm();
+        [Authorize]
+        [HttpGet]
+        public List<TaskIterm> GetAll ()
         {
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, role)
-        };
-
-        var jwt = _configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwt["Key"]);
-
-        var token = new JwtSecurityToken(
-            issuer: jwt["Issuer"],
-            audience: jwt["Issuer"],
-            claims: claims,
-            expires: DateTime.Now.AddDays(1),
-            signingCredentials: new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256)
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    [HttpPost("login")]
-    public IActionResult Login(loginDTO dto)
-    {
-        var user = _dao.GetUserByNameUser(dto.username);
-
-        if (user == null)
-            return Unauthorized("Invalid username");
-
-        if (dto.password != user.PasswordHash)
-            return Unauthorized("Invalid password");
-
-        var token = GenerateToken(user.UserName, user.Role);
-
-        return Ok(new
+            return taskDao.GetAll ();
+           
+        }
+        [Authorize]
+        [HttpPost]
+        public IActionResult Insert([FromBody] TaskIterm taskIterms)
         {
-            success = true,
-            token
-        });
+            if (string.IsNullOrWhiteSpace(taskIterms.TenCongViec))
+                return BadRequest("Ten không hợp lệ");
+            if (string.IsNullOrWhiteSpace(taskIterms.LoaiCongViec))
+                return BadRequest("Công việc không hợp lệ");
+           
+            if (taskIterms.HanChot == default)
+                return BadRequest("Thời hạn không hợp lệ");
+            taskDao.Insert(taskIterms);
+            return Ok("Thêm thành công");
+        }
+        [Authorize]
+        [HttpDelete]
+        public IActionResult Delete(int macv)
+        {
+            if (macv <0)
+                return BadRequest(400);
+
+            if (taskDao.Delete(macv))
+                return Ok("Xoa Thanh Cong");
+            else return BadRequest(404);
+        }
+        [Authorize]
+        [HttpPut]
+        public IActionResult Update([FromBody]TaskIterm taskIterms)
+        {
+            if (string.IsNullOrEmpty(taskIterms.TenCongViec))
+                return BadRequest("Ten Khong duoc de trong");
+            if (string.IsNullOrEmpty(taskIterms.LoaiCongViec))
+                return BadRequest("Loai cong viec khong duoc de trong");
+           
+            if (taskIterms.MaCV< 0)
+                return BadRequest("Id khong Hop le");
+
+            if (taskDao.Update(taskIterms))
+                return Ok("Sua Thanh Cong");
+            else return BadRequest("MaCV khong ton tai");
+        }
+        [Authorize]
+        [HttpGet("search/{text}")]
+        public List<TaskIterm> Search(string text)
+        {
+            return taskDao.Search(text);
+        }
+        [Authorize]
+        [HttpGet("filter/{text}")]
+        public List<TaskIterm> loc(string text)
+        {
+            if(string.IsNullOrWhiteSpace(text)||text=="Tất cả")
+            {
+                return taskDao.GetAll();
+            }    
+            else
+                return taskDao.Loc(text);
+          
+        }
     }
 }
