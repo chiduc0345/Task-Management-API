@@ -39,4 +39,15 @@ A backend RESTful API built with ASP.NET Core for managing tasks with JWT authen
 
 ## 🧱 Architecture
 
-Basic layered structure:
+Controller → Service → DAO → Database
+
+Basic layered architecture to separate concerns and improve maintainability.
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/chiduc0345/Task-Management-API.git
