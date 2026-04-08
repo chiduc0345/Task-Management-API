@@ -1,4 +1,4 @@
-## 🖥️ Frontend (WinForms)
+<img width="150" height="141" alt="image" src="https://github.com/user-attachments/assets/0edcd959-9525-4a5c-9089-1de67331e1e5" />## 🖥️ Frontend (WinForms)
 
 This project includes a **Windows Forms (WinForms) client application** to interact with the API.
 
@@ -18,20 +18,9 @@ This project includes a **Windows Forms (WinForms) client application** to inter
 
 ## 🖼️ Application Demo
 
-👉 (QUAN TRỌNG - thêm ảnh vào đây)
-
-```
 ![Login UI](./docs/login.png)
 ![Task UI](./docs/task.png)
-```
 
-📌 Cách làm:
-1. Chạy WinForms
-2. Chụp:
-   - màn login
-   - màn task list
-3. Tạo folder `docs/`
-4. Bỏ ảnh vào
 
 ---
 
